@@ -2,6 +2,7 @@ package com.todo.college.controller;
 
 import com.todo.college.model.User;
 import com.todo.college.service.AuthService;
+import com.todo.college.service.TokenCreation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,9 @@ public class AuthController {
 
    @Autowired
    private AuthService authService;
+
+   @Autowired
+   private TokenCreation tokenCreation;
 
     @PostMapping("/signup")
     public String signup(@RequestBody User user) {
@@ -32,36 +36,20 @@ public class AuthController {
         return authService.login(user);
     }
 
-    // ---------------- UPDATE ----------------
-    public String updateUser(Long id, User updatedUser) {
+    @PutMapping("/update/{id}")
 
-        for (User user : users) {
-
-            if (user.getId().equals(id)) {
-
-                user.setName(updatedUser.getName());
-                user.setEmail(updatedUser.getEmail());
-                user.setPassword(updatedUser.getPassword());
-
-                return "User updated successfully";
-            }
-        }
-
-        return "User not found";
+    public String update(@PathVariable int id, @RequestBody User user) {
+        return  authService.updateUser((long) id,user);
     }
 
-    // ---------------- DELETE ----------------
-    public String deleteUser(Long id) {
+    @DeleteMapping("/{id}")
 
-        for (User user : users) {
+    public String delete(@PathVariable int id) {
+        return  authService.deleteUser((long) id);
+    }
 
-            if (user.getId().equals(id)) {
-
-                users.remove(user);
-                return "User deleted successfully";
-            }
-        }
-
-        return "User not found";
+    @GetMapping("/token")
+    public String generateToken() {
+        return tokenCreation.createToken();
     }
 }

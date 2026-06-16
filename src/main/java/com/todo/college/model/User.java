@@ -1,5 +1,6 @@
 package com.todo.college.model;
 
+
 public class User {
 
 
@@ -7,17 +8,17 @@ public class User {
     private String name;
     private String password;
     private String email;
+    private String token;
 
 
-    private User(){
+    private User(){}
 
-    }
-
-    private User(Long id, String name, String password, String email) {
+    private User(Long id, String name, String password, String email, String token) {
         this.id = id;
         this.name = name;
         this.password = password;
         this.email = email;
+        this.token = token;
     }
 
 
@@ -54,5 +55,12 @@ public class User {
         return password;
     }
 
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getToken() {
+        return token;
+    }
 
 }
