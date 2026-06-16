@@ -34,18 +34,17 @@ public class AuthService {
 
         user.setId(counter++);
 
-        // generate token here
-        String token = tokenCreation.createToken();
-        user.setToken(token);
-
-        users.add(user);
+//        // generate token here
+//        String token = tokenCreation.createToken();
+//        user.setToken(token);
+//
+//        users.add(user);
 
         System.out.println(user);
 
         return "Signup Successful\nUser: "
                 + user.getName()
-                + "\nEmail: " + user.getEmail()
-                + "\nToken: " + user.getToken();
+                + "\nEmail: " + user.getEmail();
 
 
     }
@@ -57,12 +56,23 @@ public class AuthService {
 
     public String login(User user) {
 
+        if (user.getEmail() == null || user.getPassword() == null) {
+            return "Email and Password required";
+        }
+
         for (User existingUser : users) {
 
-            if (existingUser.getEmail().equalsIgnoreCase(user.getEmail()) && existingUser.getPassword()
-                            .equals(user.getPassword())) {
+            if (existingUser.getEmail() != null
+                    && existingUser.getPassword() != null
+                    && existingUser.getEmail().equalsIgnoreCase(user.getEmail())
+                    && existingUser.getPassword().equals(user.getPassword())) {
 
-                return "Login Successful";
+
+                String token = tokenCreation.createToken();
+                user.setToken(token);
+
+
+                return "Login Successful\nToken: " + existingUser.getToken();
             }
         }
 
