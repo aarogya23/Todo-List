@@ -1,10 +1,13 @@
 package com.todo.college.service;
 
 import com.todo.college.model.User;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -13,82 +16,182 @@ public class AuthService {
     @Autowired
     private TokenCreation tokenCreation;
 
-    private List<User> users = new ArrayList<>();
+    @Autowired
+    private BCryptPasswordEncoder encoder;
+
+    private final List<User> users =
+            new ArrayList<>();
 
     private Long counter = 1L;
 
+
+    // ================= SIGNUP =================
+
     public String signup(User user) {
 
+        if (user.getName() == null
+                || user.getEmail() == null
+                || user.getPassword() == null) {
 
+            return "All fields are required";
+        }
 
-            for (User existingUser : users) {
+        for (User existingUser : users) {
 
-                if (existingUser.getEmail() != null
-                        && user.getEmail() != null
-                        && existingUser.getEmail().equalsIgnoreCase(user.getEmail())) {
+            if (existingUser.getEmail() != null
 
-                    return "Email already exists";
-                }
+                    &&
+
+                    existingUser.getEmail()
+                            .equalsIgnoreCase(
+                                    user.getEmail()
+                            )
+            ) {
+
+                return "Email already exists";
             }
-
+        }
 
         user.setId(counter++);
 
-//        // generate token here
-//        String token = tokenCreation.createToken();
-//        user.setToken(token);
-//
-//        users.add(user);
+        user.setPassword(
 
-        System.out.println(user);
+                encoder.encode(
+                        user.getPassword()
+                )
+        );
 
-        return "Signup Successful\nUser: "
-                + user.getName()
-                + "\nEmail: " + user.getEmail();
+        user.setToken(null);
 
+        users.add(user);
 
+        return "Signup Successful";
     }
 
-    public List<User> getAllUsers() {
 
-        return users;
-    }
+    // ================= LOGIN =================
 
     public String login(User user) {
 
-        if (user.getEmail() == null || user.getPassword() == null) {
+        if (user.getEmail() == null
+                || user.getPassword() == null) {
+
             return "Email and Password required";
         }
 
         for (User existingUser : users) {
 
             if (existingUser.getEmail() != null
-                    && existingUser.getPassword() != null
-                    && existingUser.getEmail().equalsIgnoreCase(user.getEmail())
-                    && existingUser.getPassword().equals(user.getPassword())) {
 
+                    &&
 
-                String token = tokenCreation.createToken();
-                user.setToken(token);
+                    existingUser.getEmail()
+                            .equalsIgnoreCase(
+                                    user.getEmail()
+                            )
 
+                    &&
 
-                return "Login Successful\nToken: " + existingUser.getToken();
+                    encoder.matches(
+
+                            user.getPassword(),
+
+                            existingUser.getPassword()
+                    )
+            ) {
+
+                String token =
+
+                        tokenCreation
+                                .createToken();
+
+                existingUser.setToken(token);
+
+                return "Login Successful\n\n"
+
+                        + "Token : "
+
+                        + token;
             }
         }
 
         return "Invalid email or password";
     }
 
-    // ---------------- UPDATE ----------------
-    public String updateUser(Long id, User updatedUser) {
+
+    // ================= VALIDATE TOKEN =================
+
+    public User validateUser(String token) {
+
+        for (User user : users) {
+
+            if (user.getToken() != null
+
+                    &&
+
+                    user.getToken()
+                            .equals(token)
+            ) {
+
+                return user;
+            }
+        }
+
+        return null;
+    }
+
+
+    // ================= GET USERS =================
+
+    public List<User> getAllUsers() {
+
+        return users;
+    }
+
+
+    // ================= GET USER BY ID =================
+
+    public User getUserById(Long id) {
 
         for (User user : users) {
 
             if (user.getId().equals(id)) {
 
-                user.setName(updatedUser.getName());
-                user.setEmail(updatedUser.getEmail());
-                user.setPassword(updatedUser.getPassword());
+                return user;
+            }
+        }
+
+        return null;
+    }
+
+
+    // ================= UPDATE USER =================
+
+    public String updateUser(Long id,
+                             User updatedUser) {
+
+        for (User user : users) {
+
+            if (user.getId().equals(id)) {
+
+                user.setName(
+                        updatedUser.getName()
+                );
+
+                user.setEmail(
+                        updatedUser.getEmail()
+                );
+
+                if (updatedUser.getPassword() != null) {
+
+                    user.setPassword(
+
+                            encoder.encode(
+
+                                    updatedUser.getPassword()
+                            )
+                    );
+                }
 
                 return "User updated successfully";
             }
@@ -97,14 +200,27 @@ public class AuthService {
         return "User not found";
     }
 
-    // ---------------- DELETE ----------------
+
+    // ================= DELETE USER =================
+
     public String deleteUser(Long id) {
 
-        for (User user : users) {
+        Iterator<User> iterator =
 
-            if (user.getId().equals(id)) {
+                users.iterator();
 
-                users.remove(user);
+        while (iterator.hasNext()) {
+
+            User user =
+
+                    iterator.next();
+
+            if (user.getId()
+                    .equals(id)
+            ) {
+
+                iterator.remove();
+
                 return "User deleted successfully";
             }
         }
@@ -112,5 +228,21 @@ public class AuthService {
         return "User not found";
     }
 
+
+    // ================= LOGOUT =================
+
+    public String logout(String token) {
+
+        User user = validateUser(token);
+
+        if (user == null) {
+
+            return "Invalid token";
+        }
+
+        user.setToken(null);
+
+        return "Logout Successful";
+    }
 
 }
