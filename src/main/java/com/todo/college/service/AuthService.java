@@ -65,7 +65,7 @@ public class AuthService {
 
         users.add(user);
 
-        return "Signup Successful";
+        return user.getName() + " have successfully signuped in the application";
     }
 
 
