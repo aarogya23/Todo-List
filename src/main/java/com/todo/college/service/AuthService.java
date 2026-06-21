@@ -205,21 +205,11 @@ public class AuthService {
 
     public String deleteUser(Long id) {
 
-        Iterator<User> iterator =
+        for (int i = 0; i < users.size(); i++) {
 
-                users.iterator();
+            if (users.get(i).getId().equals(id)) {
 
-        while (iterator.hasNext()) {
-
-            User user =
-
-                    iterator.next();
-
-            if (user.getId()
-                    .equals(id)
-            ) {
-
-                iterator.remove();
+                users.remove(i);
 
                 return "User deleted successfully";
             }
