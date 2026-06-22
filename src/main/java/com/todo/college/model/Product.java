@@ -6,14 +6,24 @@ public class Product {
     private String name;
     private String description;
     private String category;
+    private String token;
 
     public Product() {}
 
-    public Product(Long id, String name, String description, String category) {
+    public Product(Long id, String name, String description, String category, String token) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.category = category;
+        this.token = token;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public Long getId() {

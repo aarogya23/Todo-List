@@ -23,12 +23,9 @@ public class TodoItemsService {
 
     // ================= CREATE =================
 
-    public String createTodo(
-            String token,
-            TodoItems todo){
+    public String createTodo(String token, TodoItems todo){
 
-        User user =
-                authService.validateUser(token);
+        User user = authService.validateUser(token);
 
         if(user == null){
 
